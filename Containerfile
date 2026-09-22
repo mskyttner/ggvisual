@@ -5,7 +5,7 @@
 # produces today's image — see persistent-service.md's "Merged Containerfile"
 # section for why the two can't share one ENTRYPOINT.
 
-FROM golang:1.25-bookworm AS builder
+FROM golang:1.26-bookworm AS builder
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
