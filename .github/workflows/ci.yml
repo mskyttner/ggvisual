@@ -142,6 +142,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: Containerfile
           target: cli
           platforms: linux/amd64
           push: true
@@ -165,6 +166,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: Containerfile
           target: service
           platforms: linux/amd64
           push: true
