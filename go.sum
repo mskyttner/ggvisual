@@ -4,8 +4,8 @@ github.com/eliukblau/pixterm v1.3.3 h1:kgEgMpffLlmiBNRiskDb6lLkrmK+XKOmGXqmnRL4E
 github.com/eliukblau/pixterm v1.3.3/go.mod h1:xoQmNwx1i4psfnF+fM5YlEs+5Wfs0yMBFlHSAAtg+dY=
 github.com/lucasb-eyer/go-colorful v1.4.1 h1:1EO+WB73+EH8EVbzlrG3KLAfEypQWVHIBqlTf+2hNss=
 github.com/lucasb-eyer/go-colorful v1.4.1/go.mod h1:R4dSotOR9KMtayYi1e77YzuveK+i7ruzyGqttikkLy0=
-github.com/wader/ansisvg v0.4.0 h1:ikJZzmZdIJjtA/VkQ++keGTyCWlS8o8RUvfF7egctpI=
-github.com/wader/ansisvg v0.4.0/go.mod h1:d2ME7Xn72fO37bClumDW6A+g7hzSHsHy+wTW/AyK+KU=
+github.com/wader/ansisvg v0.5.0 h1:M9icex4NLtveoPIY9gdGBRbDnFWssdekKT6ODUXx4Lk=
+github.com/wader/ansisvg v0.5.0/go.mod h1:d2ME7Xn72fO37bClumDW6A+g7hzSHsHy+wTW/AyK+KU=
 golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8/go.mod h1:FeLwcggjj3mMvU+oOTbSwawSJRM1uh48EjtB4UJZlP0=
 golang.org/x/image v0.38.0 h1:5l+q+Y9JDC7mBOMjo4/aPhMDcxEptsX+Tt3GgRQRPuE=
 golang.org/x/image v0.38.0/go.mod h1:/3f6vaXC+6CEanU4KJxbcUZyEePbyKbaLoDOe4ehFYY=
