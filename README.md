@@ -11,7 +11,6 @@ This repo has two things in it:
 - **`ggvisual`** (`cmd/ggvisual`) — the same rendering pipeline as a persistent HTTP service
   (`POST /render`, `POST /validate`, `GET /formats`, `GET /health`, `GET /version`), for services
   that want to proxy chart requests instead of shelling out to a CLI per request. See
-  [`persistent-service.md`](persistent-service.md) for the design and
   [`internal/chartconv`](internal/chartconv)/[`internal/ggexec`](internal/ggexec) for the shared
   implementation both binaries build on.
 
@@ -25,7 +24,7 @@ podman build --target service -t localhost/ggvisual:latest .  # the ggvisual HTT
 
 ## Requirements
 
-- Go 1.25+
+- Go 1.26+
 - [DuckDB](https://duckdb.org/) CLI (for `duckpipe`'s input)
 - [Podman](https://podman.io/) (for building/running the `ggsql`/`ggvisual` images)
 
