@@ -5,6 +5,8 @@
 /embed.html
 /embed-r.html
 /testy.html
+*.png
+/persistent-service.md
 
 # Private, per-user project instructions (see CLAUDE.local.md itself) — never committed.
 CLAUDE.local.md
