@@ -1,0 +1,22 @@
+services:
+  ggsql:
+    build:
+      context: .
+      dockerfile: Containerfile
+      target: cli
+    image: localhost/ggsql:latest
+    # Run one-shot via: podman-compose run --rm ggsql exec "<query>" --reader duckdb://memory
+    # The duckpipe binary uses this image automatically.
+
+  ggvisual:
+    build:
+      context: .
+      dockerfile: Containerfile
+      target: service
+    image: localhost/ggvisual:latest
+    # Persistent HTTP service form — see persistent-service.md. No `ports:`
+    # entry: reached only by service name on the compose network (e.g. by
+    # caddy-duckdb-module, mirroring that repo's fts-sidecar pattern), never
+    # published to the host.
+    expose:
+      - "8080"

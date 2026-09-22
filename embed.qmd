@@ -1,0 +1,198 @@
+---
+title: "Palmer Penguins"
+format:
+  html:
+    embed-resources: true
+    include-in-header:
+      - text: |
+          <script src="https://cdn.jsdelivr.net/npm/vega@6"></script>
+          <script src="https://cdn.jsdelivr.net/npm/vega-lite@6"></script>
+          <script src="https://cdn.jsdelivr.net/npm/vega-embed@7"></script>
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@4/css/xterm.css"/>
+          <script src="https://cdn.jsdelivr.net/npm/xterm@4/lib/xterm.js"></script>
+---
+
+```{r}
+#| echo: false
+visual <- "VISUALISE bill_length_mm AS x, flipper_length_mm AS y, species AS color
+DRAW point
+LABEL title => 'Bill Length vs Flipper Length'"
+
+# Embeds SVG output as <img src="data:..."> so the SVG's internal CSS
+# (font-family, fill) cannot bleed into the surrounding document.
+svg_img <- function(format) {
+  lines <- system2(
+    "bash",
+    c("-c", shQuote(paste(
+      "duckdb < penguins.sql 2>/dev/null",
+      "| ./bin/duckpipe --format", format, "--visual", shQuote(visual)
+    ))),
+    stdout = TRUE
+  )
+  b64 <- base64enc::base64encode(charToRaw(paste(lines, collapse = "\n")))
+  cat(sprintf('<img src="data:image/svg+xml;base64,%s" style="width:100%%;display:block">\n', b64))
+}
+
+# The SVG <img> above has no text content the browser can select/copy (it's
+# a rasterized-looking vector image, opaque to the page). This fetches the
+# same picture's colour-stripped plain-text form (--format text /
+# braille-text) and wires up a "Copy as text" button for it via a hidden
+# <pre> holding the real characters.
+copy_button <- function(format) {
+  lines <- system2(
+    "bash",
+    c("-c", shQuote(paste(
+      "duckdb < penguins.sql 2>/dev/null",
+      "| ./bin/duckpipe --format", format, "--visual", shQuote(visual)
+    ))),
+    stdout = TRUE
+  )
+  txt <- paste(lines, collapse = "\n")
+  esc <- gsub("&", "&amp;", txt, fixed = TRUE)
+  esc <- gsub("<", "&lt;", esc, fixed = TRUE)
+  esc <- gsub(">", "&gt;", esc, fixed = TRUE)
+  slug <- gsub("[^a-z]+", "-", format)
+  details_id <- paste0("actions-", slug)
+  btn_id <- paste0("copybtn-", slug)
+  pre_id <- paste0("copytext-", slug)
+  # Same vega-embed-style "..." actions menu (<details>/<summary> with the
+  # three-dot SVG icon) that duckpipe's own xterm.js snippets use, kept
+  # visually consistent across every "Copy as text" affordance on the page.
+  cat(sprintf('<details id="%s" style="position:relative;display:inline-block;margin-bottom:4px;">
+<summary style="list-style:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:28px;height:22px;border:1px solid #ddd;border-radius:4px;background:#fff;color:#434a56;" title="Actions"><svg viewBox="0 0 16 16" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle r="2" cy="8" cx="2"></circle><circle r="2" cy="8" cx="8"></circle><circle r="2" cy="8" cx="14"></circle></svg></summary>
+<div style="position:absolute;z-index:1000;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.2);border-radius:4px;padding:6px 0;margin-top:4px;min-width:140px;"><a href="#" id="%s" style="display:block;padding:4px 12px;color:#434a56;text-decoration:none;white-space:nowrap;font:13px sans-serif;">Copy as text</a></div>
+</details>
+<style>#%s summary::-webkit-details-marker{display:none}</style>
+', details_id, btn_id, details_id))
+  cat(sprintf('<pre id="%s" hidden>%s</pre>\n', pre_id, esc))
+  cat(sprintf('<script>
+(function(){
+  var btn=document.getElementById("%s");
+  var pre=document.getElementById("%s");
+  var details=document.getElementById("%s");
+  btn.addEventListener("click", function(e){
+    e.preventDefault();
+    if(details){details.open=false;}
+    navigator.clipboard.writeText(pre.textContent).then(function(){
+      var orig=btn.textContent;
+      btn.textContent="Copied!";
+      setTimeout(function(){btn.textContent=orig;},1500);
+    });
+  });
+})();
+</script>
+', btn_id, pre_id, details_id))
+}
+
+# The DuckDB ggsql *extension* (a community extension, `INSTALL ggsql FROM
+# community`) is a separate implementation from the standalone ggsql CLI/
+# container duckpipe wraps above — it runs the ggsql query in-process via a
+# scalar `ggsql()` function, with `ggsql_output = 'html'` producing a fully
+# self-contained HTML document (vega/vega-lite/vega-embed bundled inline,
+# no CDN dependency at all — verified to render fully offline). This
+# assumes the extension is already installed locally; unlike duckpipe's
+# formats it isn't driven through podman/vl-convert at all.
+ggsql_ext_html <- function() {
+  csv_tmp <- tempfile(fileext = ".csv")
+  system2("bash", c("-c", paste("duckdb < penguins.sql >", shQuote(csv_tmp))))
+
+  query <- paste0("SELECT * FROM read_csv('", csv_tmp, "', header=true)\n", visual)
+  # Escape single quotes so `query` can be embedded inside a SQL '...' string
+  # literal (the ggsql() call argument) without breaking out of it.
+  query_escaped <- gsub("'", "''", query, fixed = TRUE)
+
+  html_tmp <- tempfile(fileext = ".html")
+  sql_tmp <- tempfile(fileext = ".sql")
+  writeLines(c(
+    "LOAD ggsql;",
+    "SET ggsql_output = 'html';",
+    sprintf(
+      "COPY (SELECT ggsql('%s')) TO '%s' (FORMAT CSV, HEADER false, QUOTE '');",
+      query_escaped, html_tmp
+    )
+  ), sql_tmp)
+  system2("duckdb", character(0), stdin = sql_tmp, stdout = FALSE, stderr = FALSE)
+
+  html <- paste(readLines(html_tmp, warn = FALSE), collapse = "\n")
+  b64 <- base64enc::base64encode(charToRaw(html))
+  cat(sprintf(
+    '<iframe src="data:text/html;base64,%s" style="width:100%%;height:600px;border:1px solid #ddd;" title="ggsql extension standalone export"></iframe>\n',
+    b64
+  ))
+}
+```
+
+## Interactive
+
+```{r}
+#| echo: false
+#| output: asis
+html <- system2(
+  "bash",
+  c("-c", shQuote(paste(
+    "duckdb < penguins.sql 2>/dev/null",
+    "| ./bin/duckpipe --format html-body --visual", shQuote(visual)
+  ))),
+  stdout = TRUE
+)
+cat(paste(html, collapse = "\n"))
+```
+
+## Terminal (ANSI blocks)
+
+```{r}
+#| echo: false
+#| output: asis
+svg_img("svg")
+copy_button("text")
+```
+
+## Terminal (braille)
+
+```{r}
+#| echo: false
+#| output: asis
+svg_img("braille-svg")
+copy_button("braille-text")
+```
+
+```{r}
+#| echo: false
+# Emits an xterm.js <div>+<script> fragment. xterm.js must already be loaded
+# globally (via include-in-header) since this isn't a standalone page.
+xterm_html <- function(format) {
+  lines <- system2(
+    "bash",
+    c("-c", shQuote(paste(
+      "duckdb < penguins.sql 2>/dev/null",
+      "| ./bin/duckpipe --format", format, "--visual", shQuote(visual)
+    ))),
+    stdout = TRUE
+  )
+  cat(paste(lines, collapse = "\n"))
+}
+```
+
+## Terminal (xterm.js, ANSI blocks)
+
+```{r}
+#| echo: false
+#| output: asis
+xterm_html("xterm")
+```
+
+## Terminal (xterm.js, braille)
+
+```{r}
+#| echo: false
+#| output: asis
+xterm_html("braille-xterm")
+```
+
+## DuckDB ggsql extension (standalone HTML)
+
+```{r}
+#| echo: false
+#| output: asis
+ggsql_ext_html()
+```

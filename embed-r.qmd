@@ -1,0 +1,44 @@
+---
+title: "ggsql R Package — mtcars & Palmer Penguins"
+format:
+  html:
+    embed-resources: true
+---
+
+## mtcars via R package
+
+Uses `pak::pak("posit-dev/ggsql-r")` + native R API. No shell pipeline, no
+container — the Rust ggsql engine runs in-process via the R package.
+
+```{r}
+#| echo: false
+if (!requireNamespace("ggsql", quietly = TRUE)) {
+  pak::pak("posit-dev/ggsql-r")
+}
+library(ggsql)
+
+reader <- duckdb_reader()
+ggsql_register(reader, mtcars, "amazing_data")
+
+ggsql_execute(reader, "
+  SELECT * FROM amazing_data
+  VISUALIZE mpg AS x, disp AS y
+  DRAW point
+  LABEL title => 'MPG vs Displacement'
+")
+```
+
+## Palmer Penguins via R package
+
+Same dataset as `embed.qmd` — DuckDB reads the parquet directly from the URL.
+
+```{r}
+#| echo: false
+ggsql_execute(reader, r"(
+  SELECT *
+  FROM read_parquet("https://csvbase.com/calpaterson/palmer-penguins.parquet")
+  VISUALISE bill_length_mm AS x, flipper_length_mm AS y, species AS color
+  DRAW point
+  LABEL title => 'Bill Length vs Flipper Length'
+)")
+```

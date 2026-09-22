@@ -1,0 +1,10 @@
+/bin/
+/duckpipe
+/ggvisual
+/demo/
+/embed.html
+/embed-r.html
+/testy.html
+
+# Private, per-user project instructions (see CLAUDE.local.md itself) — never committed.
+CLAUDE.local.md
