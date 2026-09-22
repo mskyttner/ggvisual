@@ -170,6 +170,7 @@ jobs:
           target: service
           platforms: linux/amd64
           push: true
+          load: true
           tags: ${{ steps.meta-service.outputs.tags }}
           labels: ${{ steps.meta-service.outputs.labels }}
           cache-from: type=gha,scope=service
