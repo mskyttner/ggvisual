@@ -24,7 +24,7 @@ on:
       - main
 
 env:
-  GO_VERSION: '1.25'
+  GO_VERSION: '1.26'
   CLI_IMAGE_NAME: ghcr.io/${{ github.repository }}-cli
   SERVICE_IMAGE_NAME: ghcr.io/${{ github.repository }}
 
