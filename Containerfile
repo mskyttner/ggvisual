@@ -13,7 +13,7 @@ COPY cmd/ggvisual ./cmd/ggvisual
 COPY internal ./internal
 RUN CGO_ENABLED=0 go build -o /ggvisual ./cmd/ggvisual
 
-FROM ubuntu:24.04 AS base
+FROM ubuntu:26.04 AS base
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends wget ca-certificates unixodbc unzip libfontconfig1 fonts-dejavu-core util-linux \
