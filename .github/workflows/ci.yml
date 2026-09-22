@@ -129,7 +129,7 @@ jobs:
 
       - name: Extract metadata (cli image)
         id: meta-cli
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.CLI_IMAGE_NAME }}
           tags: |
@@ -153,7 +153,7 @@ jobs:
 
       - name: Extract metadata (service image)
         id: meta-service
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.SERVICE_IMAGE_NAME }}
           tags: |
