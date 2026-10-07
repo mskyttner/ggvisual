@@ -1,6 +1,6 @@
 module ggsql-tools
 
-go 1.26.0
+go 1.27.0
 
 require (
 	github.com/eliukblau/pixterm v1.3.3
@@ -11,6 +11,6 @@ require (
 
 require (
 	github.com/disintegration/imaging v1.6.2 // indirect
-	golang.org/x/image v0.38.0 // indirect
+	golang.org/x/image v0.46.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 )
