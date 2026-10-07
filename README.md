@@ -24,7 +24,7 @@ podman build --target service -t localhost/ggvisual:latest .  # the ggvisual HTT
 
 ## Requirements
 
-- Go 1.26+
+- Go 1.27+
 - [DuckDB](https://duckdb.org/) CLI (for `duckpipe`'s input)
 - [Podman](https://podman.io/) (for building/running the `ggsql`/`ggvisual` images)
 
